@@ -1,71 +1,42 @@
 import streamlit as st
 import random
 
-# Set a dark theme for the Streamlit app
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background: #121212;
-        color: #ffffff;
-    }
-    .stTextInput > div > div > input {
-        background: #121212;
-        color: #ffffff;
-    }
-    .stTextInput > div > label {
-        color: #ffffff;
-    }
-    .stButton > button {
-        background: #009688;
-        color: #ffffff;
-    }
-    .stButton > button:hover {
-        background: #007a6b;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# Define a list of card pairs (should have at least 2 of each to form pairs)
+card_pairs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-st.title("Minesweeper Game")
+# Shuffle the card pairs randomly
+random.shuffle(card_pairs)
+cards = card_pairs + card_pairs  # Create pairs
 
-size = st.slider("Select the size of the Minesweeper grid:", 5, 20, 10)
+st.title("Memory Card Game")
 
-# Generate the Minesweeper grid
-grid = [[0 for _ in range(size)] for _ in range(size)]
-mines = random.sample(range(size * size), size)
+# Create a board to display the cards
+board = [st.empty() for _ in range(16)]
 
-for mine in mines:
-    row, col = divmod(mine, size)
-    grid[row][col] = "X"
+# Initialize variables
+selected_cards = []
+solved_pairs = 0
 
-# Define directions for adjacent cells
-directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+for i in range(4):
+    for j in range(4):
+        idx = i * 4 + j
+        if not board[idx].button(f"Card {idx + 1}"):
+            continue
 
-def count_adjacent_mines(row, col):
-    count = 0
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-        if 0 <= r < size and 0 <= c < size and grid[r][c] == "X":
-            count += 1
-    return count
+        if idx not in selected_cards:
+            selected_cards.append(idx)
 
-def reveal(row, col):
-    if 0 <= row < size and 0 <= col < size:
-        if grid[row][col] == 0:
-            grid[row][col] = count_adjacent_mines(row, col)
-            if grid[row][col] == 0:
-                for dr, dc in directions:
-                    reveal(row + dr, col + dc)
+            if len(selected_cards) == 2:
+                if cards[selected_cards[0]] == cards[selected_cards[1]]:
+                    solved_pairs += 1
+                    st.success("You found a pair!")
+                else:
+                    st.warning("Not a match. Try again!")
 
-for row in range(size):
-    for col in range(size):
-        if st.button("", key=f"{row}-{col}", args=(row, col)):
-            if grid[row][col] == "X":
-                st.markdown("You hit a mine! Game over.")
-            else:
-                reveal(row, col)
+                # Clear selected cards
+                selected_cards = []
 
-st.text("Left-click to reveal a tile.")
-st.text("Right-click to flag a potential mine.")
+        if solved_pairs == len(card_pairs):
+            st.success("Congratulations! You've matched all the pairs!")
+
+st.write("To play, click on the buttons to reveal the cards. Try to find all the matching pairs.")
