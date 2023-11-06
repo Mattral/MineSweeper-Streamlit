@@ -24,6 +24,12 @@ st.markdown(
     .stButton > button:hover {
         background: #007a6b;
     }
+    .custom-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 10px;
+        text-align: center;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -44,26 +50,23 @@ def update_game():
 
 st.text("Click on the moles as quickly as possible!")
 
-grid_container = st.container()
-game_container = st.container()
-
 if st.button("Start Game"):
     update_game()
 
-with grid_container:
-    for row in range(grid_size):
-        for col in range(grid_size):
-            if game_over and (row, col) == mole_position:
-                st.button(f"Mole\nScore: {score}", key=(row, col))
-            elif st.button("", key=(row, col)):
-                if (row, col) == mole_position:
-                    score += 1
-                update_game()
+st.markdown("<div class='custom-grid'>", unsafe_allow_html=True)
+for row in range(grid_size):
+    for col in range(grid_size):
+        if game_over and (row, col) == mole_position:
+            st.button(f"Mole\nScore: {score}", key=(row, col))
+        elif st.button("", key=(row, col)):
+            if (row, col) == mole_position:
+                score += 1
+            update_game()
+st.markdown("</div>", unsafe_allow_html=True)
 
-with game_container:
-    if score >= 10:
-        st.text("Congratulations! You win!")
-    elif game_over:
-        st.text("Game Over. Try again!")
+if score >= 10:
+    st.text("Congratulations! You win!")
+elif game_over:
+    st.text("Game Over. Try again!")
 
 st.text("Pro Tip: You can enhance this game with animations and sound effects for a better experience.")
