@@ -10,17 +10,15 @@ cards = card_pairs + card_pairs  # Create pairs
 
 st.title("Memory Card Game")
 
-# Create a board to display the cards
-board = [st.empty() for _ in range(16)]
-
-# Initialize variables
+# Create a 4x4 grid to display the cards
+columns = st.beta_columns(4)
 selected_cards = []
 solved_pairs = 0
 
 for i in range(4):
     for j in range(4):
         idx = i * 4 + j
-        if not board[idx].button(f"Card {idx + 1}"):
+        if not columns[j].button(f"Card {idx + 1}"):
             continue
 
         if idx not in selected_cards:
