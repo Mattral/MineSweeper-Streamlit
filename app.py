@@ -1,86 +1,42 @@
 import streamlit as st
 import random
-import time
-from streamlit.ReportThread import get_report_ctx
 
-# Set a dark theme for the Streamlit app
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background: #121212;
-        color: #ffffff;
-    }
-    .stTextInput > div > div > input {
-        background: #121212;
-        color: #ffffff;
-    }
-    .stTextInput > div > label {
-        color: #ffffff;
-    }
-    .stButton > button {
-        background: #009688;
-        color: #ffffff;
-    }
-    .stButton > button:hover {
-        background: #007a6b;
-    }
-    .custom-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-gap: 10px;
-        text-align: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# Define a list of card pairs (should have at least 2 of each to form pairs)
+card_pairs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-# Whack-a-Mole Game
-st.title("Whack-a-Mole Game")
+# Shuffle the card pairs randomly
+random.shuffle(card_pairs)
+cards = card_pairs + card_pairs  # Create pairs
 
-# Game parameters
-grid_size = 4
-game_over = False
-score = 0
-active_mole = None
-duration = 0.5  # Duration for mole appearance
+st.title("Memory Card Game")
 
-# Create a grid
-grid = [[False for _ in range(grid_size)] for _ in range(grid_size)]
+# Create a board to display the cards
+board = [st.empty() for _ in range(16)]
 
-# Function to update the game
-def update_game():
-    global active_mole, score
-    active_mole = (random.randint(0, grid_size - 1), random.randint(0, grid_size - 1))
-    score = 0
+# Initialize variables
+selected_cards = []
+solved_pairs = 0
 
-# Start a new game
-update_game()
+for i in range(4):
+    for j in range(4):
+        idx = i * 4 + j
+        if not board[idx].button(f"Card {idx + 1}"):
+            continue
 
-st.text("Click on the moles as quickly as possible!")
+        if idx not in selected_cards:
+            selected_cards.append(idx)
 
-if st.button("Start Game"):
-    update_game()
+            if len(selected_cards) == 2:
+                if cards[selected_cards[0]] == cards[selected_cards[1]]:
+                    solved_pairs += 1
+                    st.success("You found a pair!")
+                else:
+                    st.warning("Not a match. Try again!")
 
-# Create a custom grid for the game
-st.markdown("<div class='custom-grid'>", unsafe_allow_html=True)
-for row in range(grid_size):
-    for col in range(grid_size):
-        # Handle the active mole
-        if game_over and (row, col) == active_mole:
-            st.button(f"Mole\nScore: {score}", key=(row, col))
-        elif st.button("", key=(row, col)):
-            if (row, col) == active_mole:
-                score += 1
-            update_game()
+                # Clear selected cards
+                selected_cards = []
 
-st.markdown("</div>", unsafe_allow_html=True)
+        if solved_pairs == len(card_pairs):
+            st.success("Congratulations! You've matched all the pairs!")
 
-# Game over condition
-if score >= 10:
-    st.text("Congratulations! You win!")
-elif game_over:
-    st.text("Game Over. Try again!")
-
-st.text("Pro Tip: You can enhance this game with animations and sound effects for a better experience.")
+st.write("To play, click on the buttons to reveal the cards. Try to find all the matching pairs.")
