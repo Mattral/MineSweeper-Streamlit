@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 
 # Set a dark theme for the Streamlit app
 st.markdown(
@@ -28,44 +29,41 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("Minesweeper Game")
+st.title("Whack-a-Mole Game")
 
-size = st.slider("Select the size of the Minesweeper grid:", 5, 20, 10)
+grid_size = 4
+mole_position = (0, 0)
+score = 0
+game_over = False
 
-# Generate the Minesweeper grid
-grid = [[0 for _ in range(size)] for _ in range(size)]
-mines = random.sample(range(size * size), size)
+def update_game():
+    global mole_position, score, game_over
+    mole_position = (random.randint(0, grid_size-1), random.randint(0, grid_size-1))
+    score = 0
+    game_over = False
 
-for mine in mines:
-    row, col = divmod(mine, size)
-    grid[row][col] = "X"
+st.text("Click on the moles as quickly as possible!")
 
-# Define directions for adjacent cells
-directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+grid_container = st.container()
+game_container = st.container()
 
-def count_adjacent_mines(row, col):
-    count = 0
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-        if 0 <= r < size and 0 <= c < size and grid[r][c] == "X":
-            count += 1
-    return count
+if st.button("Start Game"):
+    update_game()
 
-def reveal(row, col):
-    if 0 <= row < size and 0 <= col < size:
-        if grid[row][col] == 0:
-            grid[row][col] = count_adjacent_mines(row, col)
-            if grid[row][col] == 0:
-                for dr, dc in directions:
-                    reveal(row + dr, col + dc)
+with grid_container:
+    for row in range(grid_size):
+        for col in range(grid_size):
+            if game_over and (row, col) == mole_position:
+                st.button(f"Mole\nScore: {score}", key=(row, col))
+            elif st.button("", key=(row, col)):
+                if (row, col) == mole_position:
+                    score += 1
+                update_game()
 
-for row in range(size):
-    for col in range(size):
-        if st.button("", key=f"{row}-{col}", args=(row, col)):
-            if grid[row][col] == "X":
-                st.markdown("You hit a mine! Game over.")
-            else:
-                reveal(row, col)
+with game_container:
+    if score >= 10:
+        st.text("Congratulations! You win!")
+    elif game_over:
+        st.text("Game Over. Try again!")
 
-st.text("Left-click to reveal a tile.")
-st.text("Right-click to flag a potential mine.")
+st.text("Pro Tip: You can enhance this game with animations and sound effects for a better experience.")
