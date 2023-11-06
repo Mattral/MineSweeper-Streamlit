@@ -39,7 +39,7 @@ for idx in range(16):
     if idx in selected_cards:
         continue
 
-    if st.button(f'<div class="grid-item">Card {idx + 1}</div>', key=idx):
+    if st.button(f'Card {idx + 1}', key=idx, help=f"Card {cards[idx]}"):
         selected_cards.append(idx)
 
         if len(selected_cards) == 2:
