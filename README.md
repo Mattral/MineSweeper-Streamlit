@@ -1,2 +1,2 @@
-# MineSweeper-Streamlit
-Test Repo
+# Game testing with Streamlit
+Test Repo, will rename or delete later
