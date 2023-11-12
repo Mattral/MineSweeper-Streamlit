@@ -55,6 +55,7 @@ for idx in range(16):
     if solved_pairs == len(card_pairs):
         st.success("Congratulations! You've matched all the pairs!")
 
+
 # Close the grid container
 st.markdown('</div>', unsafe_allow_html=True)
 
